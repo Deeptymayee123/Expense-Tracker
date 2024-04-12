@@ -1,6 +1,6 @@
-import React, { createContext, useReducer } from "react";
-import AppReducer from "./AppReducer";
-import axios from "axios";
+import React, { createContext, useReducer } from 'react';
+import AppReducer from './AppReducer';
+import { axiosClient } from '../services/axiosClient';
 
 //Initial state
 const initialState = {
@@ -19,15 +19,17 @@ export const GlobalProvider = ({ children }) => {
   // action
   async function getTransactions() {
     try {
-      const res = await axios.get(`/api/v1/transactions`);
+      const res = await axiosClient.get(`/api/v1/transactions`);
+
+      console.log(res);
 
       dispatch({
-        type: "GET_TRANSACTION",
+        type: 'GET_TRANSACTION',
         payload: res.data.data,
       });
     } catch (err) {
       dispatch({
-        type: "TRANSACTION_ERROR",
+        type: 'TRANSACTION_ERROR',
         payload: err.response.data.error,
       });
     }
@@ -35,43 +37,40 @@ export const GlobalProvider = ({ children }) => {
 
   async function deleteTransaction(id) {
     try {
-      await axios.delete(`/api/v1/transactions/${id}`);
+      await axiosClient.delete(`/api/v1/transactions/${id}`);
 
       dispatch({
-        type: "DELETE_TRANSACTION",
+        type: 'DELETE_TRANSACTION',
         payload: id,
       });
     } catch (err) {
       dispatch({
-        type: "TRANSACTION_ERROR",
+        type: 'TRANSACTION_ERROR',
         payload: err.response.data.error,
       });
     }
   }
 
   async function addTransaction(transaction) {
-    const config = {
-      headers: {
-        "Content-type": "application/json",
-      },
-    };
-
     try {
-      const res = await axios.post(`/api/v1/transactions`, transaction, config);
+      const res = await axiosClient.post(`/api/v1/transactions`, transaction);
+
+      console.log('res after add: ', res);
 
       dispatch({
-        type: "ADD_TRANSACTION",
+        type: 'ADD_TRANSACTION',
         payload: res.data.data,
       });
     } catch (err) {
       dispatch({
-        type: "ADD_TRANSACTION",
+        type: 'ADD_TRANSACTION',
         payload: err.response.data.error,
       });
     }
   }
+
   return (
-    <GlobalContext
+    <GlobalContext.Provider
       value={{
         transactions: state.transactions,
         error: state.error,
@@ -82,6 +81,6 @@ export const GlobalProvider = ({ children }) => {
       }}
     >
       {children}
-    </GlobalContext>
+    </GlobalContext.Provider>
   );
 };
